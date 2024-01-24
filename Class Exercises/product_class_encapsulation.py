@@ -14,7 +14,7 @@ class Product:
         return self.__price
 
     @product_price.setter
-    def price(self, price):
+    def product_price(self, price):
         if price <= 0:
             raise ValueError("Price cannot be less that 0")
         else:
