@@ -1,4 +1,4 @@
-from First_Class import Product
+from product_class_encapsulation import Product
 
 
 def show_products(products):
@@ -11,10 +11,10 @@ def show_products(products):
 def show_individual_product(product):
     width = 18
     print(f"{'Name:':{width}} {product.name}")
-    print(f"{'Price:':{width}} {product.price:.2f}")
-    print(f"{'Discount percent:':{width}} {product.discount_percent:d}%")
-    print(f"{'Discount amount:':{width}} {product.get_discount_amount():.2f}")
-    print(f"{'Discount price':{width}} {product.get_discount_price():.2f}")
+    print(f"{'Price:':{width}} {product.product_price:.2f}")
+    print(f"{'Discount percent:':{width}} {product.discountPercent:d}%")
+    print(f"{'Discount amount:':{width}} {product.getDiscountAmount():.2f}")
+    print(f"{'Discount price':{width}} {product.getDiscountPercent():.2f}")
     print()
 
 
