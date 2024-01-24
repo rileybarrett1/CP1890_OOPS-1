@@ -17,8 +17,8 @@ def main():
         dice.rollAll()
 
         print("YOUR ROLL: ", end="")
-        for die in dice.list_die:
-            print(die.value, end=' ')
+        for die in dice.list_dice:
+            print(die.get_value, end=' ')
         print()
 
         choice = input("Roll again? (y/n): ")

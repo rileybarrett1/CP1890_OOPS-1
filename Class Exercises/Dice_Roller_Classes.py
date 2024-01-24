@@ -4,19 +4,26 @@ from dataclasses import dataclass
 
 @dataclass
 class Die:
-    value: int = 1
+    __value: int = 1
 
     def roll(self):
-        self.value = random.randint(1, 6)
+        self.__value = random.randint(1, 6)
+    @property
+    def get_value(self):
+        return self.__value
 
 
 class Dice:
     def __init__(self):
-        self.list_die = []
+        self.__list_die = []
 
     def addDie(self, die):
-        self.list_die.append(die)
+        self.__list_die.append(die)
 
     def rollAll(self):
-        for die in self.list_die:
+        for die in self.__list_die:
             die.roll()
+
+    @property
+    def list_dice(self):
+        return tuple(self.__list_die)
