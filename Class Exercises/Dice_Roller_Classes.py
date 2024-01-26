@@ -8,6 +8,7 @@ class Die:
 
     def roll(self):
         self.__value = random.randint(1, 6)
+
     @property
     def get_value(self):
         return self.__value
