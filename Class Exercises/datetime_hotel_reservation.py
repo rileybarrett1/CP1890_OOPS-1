@@ -39,7 +39,7 @@ def main():
 
     do_again = 'y'
     while do_again.lower() == 'y':
-        #Get the datetime from user
+        # Get the datetime from user
         arrival_date = get_arrival_date()
         departure_date = get_departure_date(arrival_date)
         print()
