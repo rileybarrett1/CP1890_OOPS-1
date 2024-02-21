@@ -16,6 +16,12 @@ class Product:
     def getDescription(self) -> str:
         return self.name
 
+    def __str__(self):
+        return self.name + " is actually Thor's Hammer."
+
+    def __eq__(self, other):
+        return self.name == other.name
+
 
 # @dataclass
 # class Book(Product):
@@ -45,15 +51,15 @@ class Movie(Product):
         return f"{Product.getDescription(self)}  {self.year}"
 
 
-print(product1.getDescription())
-print(product1.getDiscountPrice())
-print(book1.getDescription())
-print(book1.getDiscountPrice())
-
-movie1 = Movie('Venom', 12.00, 5, 2013)
-print(movie1.getDescription())
-print(movie1.getDiscountPrice())
-
-print(isinstance(movie1, Movie))
-print(isinstance(movie1, Product))
-print(isinstance(movie1, Book))
+# print(product1.getDescription())
+# print(product1.getDiscountPrice())
+# print(book1.getDescription())
+# print(book1.getDiscountPrice())
+#
+# movie1 = Movie('Venom', 12.00, 5, 2013)
+# print(movie1.getDescription())
+# print(movie1.getDiscountPrice())
+#
+# print(isinstance(movie1, Movie))
+# print(isinstance(movie1, Product))
+# print(isinstance(movie1, Book))
