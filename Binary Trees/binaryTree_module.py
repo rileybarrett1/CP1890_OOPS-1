@@ -1,7 +1,8 @@
-from binarytree import build2, bst
+from binarytree import
 
 nodes = [10, 5, 4, 20, 47, None, 67]
 
 # Building the binary tree
-binary_tree = bst(height=4, is_perfect=True)
+binary_tree =
+binary_tree.
 print("Binary Tree from the list:\n", binary_tree)
