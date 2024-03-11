@@ -11,8 +11,10 @@ class Node:
     def __repr__(self):
         return f'Node: {self.data}'
 
+    def __str__(self):
+        return f'Node: This is string method {self.data}'
+
 test1 = Node(2)
-print(test1)
 
 @dataclass
 class LinkedList:
