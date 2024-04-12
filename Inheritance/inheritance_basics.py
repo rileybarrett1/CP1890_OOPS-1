@@ -39,6 +39,7 @@ class Book(Product):
     def getDescription(self) -> str:
         return f"{Product.getDescription(self)} by {self.author}"
 
+
 product1 = Product('Quartet Marker', 2.99, 20)
 book1 = Book('The Shining', 12.00, 10, 'Stephen King')
 
@@ -49,7 +50,6 @@ class Movie(Product):
 
     def getDescription(self) -> str:
         return f"{Product.getDescription(self)}  {self.year}"
-
 
 # print(product1.getDescription())
 # print(product1.getDiscountPrice())
