@@ -1,6 +1,6 @@
-# CP1890 - Assignment 2
+# CP1890 - Assignment 3
 
-**[Requirements](https://github.com/MattEKing/CP1890_OOPS/blob/master/Assignment%202/CP1890_Assignment_2.pdf)**
+**[Requirements](https://github.com/MattEKing/CP1890_OOPS/blob/master/Assignment%202/CP1890_Assignment_3.pdf)**
 
 **Group Members:**
 
