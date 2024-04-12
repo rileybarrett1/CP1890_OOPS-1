@@ -33,5 +33,8 @@ class Dice:
         return tuple(self.__list_die)
 
     def __iter__(self):
-        for die in self.__list_die:
-            yield die
+        # for die in self.__list_die:
+        #     yield die
+        yield "This is the first iteration"
+        yield "This is the second iteration"
+        yield "Omg! This is cool!"
