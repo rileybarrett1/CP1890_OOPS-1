@@ -1,106 +1,81 @@
-import re
 import tkinter as tk
-from tkinter import ttk, messagebox
-import sqlite3
-
-conn = sqlite3.connect('sales.sqlite')
-cur = conn.cursor()
+import tkinter.messagebox as ms
+import re
 
 
-def click_exit():
-    esa_window.destroy()
+def validate_date(P):
+    # If the input is empty, allow it
+    if not P:
+        return True
+
+    # Define a regular expression pattern for YYYY-MM-DD format
+    pattern = r'^\d{0,4}-?\d{0,2}-?\d{0,2}$'
+
+    # Check if the input matches the pattern
+    if re.match(pattern, P):
+        return True
+    return False
 
 
-def click_get_amount():
-    date_format = re.compile("YYYY-MM-DD")
-    region_format = re.compile("X")
-    date = date_entry.get()
-    region = region_entry.get()
-    if date_format.match(date):
-        if region_format.match(region):
-            get_amount_db()
+def save_changes():
+    if not all((entry1.get(), entry2.get(), entry3.get(), entry4.get())):
+        ms.showerror("Blank Rows", "Please enter data in all fields.")
+    elif not validate_date(entry1.get()):
+        ms.showerror("Invalid Date", "Please enter date in YYYY-MM-DD format.")
     else:
-        messagebox.showwarning("Warning", "No data for date and region.")
+        ms.showinfo("Amount Updated", "Your amount was updated successfully.")
 
+def get_amount():
+    amount = entry3.get()
+    if amount:
+        ms.showinfo("Amount", f"Your current amount is: {amount}")
+    else:
+        ms.showinfo("Amount", "No amount entered yet.")
 
-def click_save():
-    sale = amount_entry.get()
-    sale = float(sale)
-    query = f"update Sales set amount= '{sale}' where salesDate ={date_entry.get()} AND region = '{region_entry.get()}';"
-    cur.execute(query)
-    messagebox.showinfo("Info", "Saved successfully")
+root = tk.Tk()
+root.title("Edit Sales Amount")
+root.geometry("350x200")
 
+# Style for labels and entries
+label_style = ("Arial", 12)
+entry_style = ("Arial", 12)
 
-def get_amount_db():
+# Date
+label1 = tk.Label(root, text="Date:", font=label_style)
+label1.grid(row=0, column=0, sticky="w")
+entry1 = tk.Entry(root, font=entry_style, validate="key")
+entry1.grid(row=0, column=1)
+# Set validation command to ensure date format
+entry1['validatecommand'] = (root.register(validate_date), '%P')
 
-    query = f"SELECT * FROM Sales WHERE salesDate = {date_entry.get()} AND region = '{region_entry.get()}';"
-    sales = list(cur.execute(query))
-    amount_var.set(sales[0][0])
+# Region
+label2 = tk.Label(root, text="Region:", font=label_style)
+label2.grid(row=1, column=0, sticky="w")
+entry2 = tk.Entry(root, font=entry_style)
+entry2.grid(row=1, column=1)
 
-# Window code ------------------------------------------
-esa_window = tk.Tk()
-esa_window.title("Edit Sales Amount")
-esa_window.geometry("350x180")
+# Amount
+label3 = tk.Label(root, text="Amount:", font=label_style)
+label3.grid(row=2, column=0, sticky="w")
+entry3 = tk.Entry(root, font=entry_style)
+entry3.grid(row=2, column=1)
 
-esa_frame = ttk.Frame(esa_window, padding="10 10 10 10")
-esa_frame.pack(fill="both", expand=True)
+# ID
+label4 = tk.Label(root, text="ID:", font=label_style)
+label4.grid(row=3, column=0, sticky="w")
+entry4 = tk.Entry(root, font=entry_style)
+entry4.grid(row=3, column=1)
 
-esa_info = ttk.Label(esa_frame, text="Enter date and region to get sales amount.")
-esa_info.grid(column=0, row=0, columnspan=4, sticky=tk.N)
+# Save Changes button
+btn_save = tk.Button(root, text="Save Changes", command=save_changes)
+btn_save.grid(row=4, column=1, pady=5, padx=10, sticky="sw")
 
-# date -------------------------------------------------
+# Exit button
+btn_exit = tk.Button(root, text="Exit", command=root.quit)
+btn_exit.grid(row=4, column=1, pady=5, padx=10, sticky="se")
 
-date_label = ttk.Label(esa_frame, text="Date:")
-date_label.grid(column=0, row=1, sticky=tk.E)
+# Get Amount button
+btn_get_amount = tk.Button(root, text="Get Amount", command=get_amount)
+btn_get_amount.grid(row=0, column=2, rowspan=4, padx=5, pady=5, sticky="nsew")
 
-date_var = tk.StringVar()
-date_entry = ttk.Entry(esa_frame, textvariable=date_var, width=30)
-date_entry.grid(column=1, row=1, columnspan=2, sticky=tk.W)
-
-# region ----------------------------------------------
-
-region_label = ttk.Label(esa_frame, text="Region:")
-region_label.grid(column=0, row=2, sticky=tk.E)
-
-region_var = tk.StringVar()
-region_entry = ttk.Entry(esa_frame, textvariable=region_var, width=30)
-region_entry.grid(column=1, row=2, columnspan=2, sticky=tk.W)
-
-# amount ---------------------------------------------
-
-amount_label = ttk.Label(esa_frame, text="Amount:")
-amount_label.grid(column=0, row=3, sticky=tk.E)
-
-amount_var = tk.StringVar()
-amount_entry = ttk.Entry(esa_frame, textvariable=amount_var, width=30)
-amount_entry.grid(column=1, row=3, columnspan=2, sticky=tk.W)
-
-# ID --------------------------------------------------
-
-id_label = ttk.Label(esa_frame, text="ID:")
-id_label.grid(column=0, row=4, sticky=tk.E)
-
-id_var = tk.StringVar()
-id_entry = ttk.Entry(esa_frame, textvariable=id_var, width=30, state='readonly')
-id_entry.grid(column=1, row=4, columnspan=2, sticky=tk.W)
-
-# save button ----------------------------------------
-
-save_button = ttk.Button(esa_frame, text="Save Changes", command=click_save)
-save_button.grid(column=1, row=5, sticky=tk.W)
-
-
-# exit button ----------------------------------------
-
-exit_button = ttk.Button(esa_frame, text="Exit", command=click_exit)
-exit_button.grid(column=2, row=5, sticky=tk.W)
-
-# get amount button ------------------------------------------------------------------
-
-get_button = ttk.Button(esa_frame, text="Get Amount", command=click_get_amount)
-get_button.grid(column=3, row=2, sticky=tk.W)
-
-
-for child in esa_frame.winfo_children():
-    child.grid_configure(padx=2, pady=2)
-esa_window.mainloop()
+root.mainloop()
