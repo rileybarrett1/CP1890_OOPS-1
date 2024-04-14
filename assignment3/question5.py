@@ -1,97 +1,185 @@
-import sqlite3
+# Sales data importer program
 from dataclasses import dataclass
-import locale as lc
 import csv
-import datetime
+from datetime import datetime
 
-lc.setlocale(lc.LC_ALL, "en_CA")
-conn = sqlite3.connect('sales.sqlite')
-cur = conn.cursor()
-
-
-@dataclass
-class DailySales:
-    id: int
-    amount: float
-    saleData: str
-    region: str
-
-    def from_db(self):
-        pass
-
-
-@dataclass
-class SalesList:
-    sales: list
-
-    def add(self, sale):
-        self.sales.append(sale)
-
-
+# creating the region for the region class
 @dataclass
 class Region:
-    code: str
-    name: str
+    name: str = ""
+    code: str = ""
+    region: str = ""
+    # getting the region from the code 
+    @classmethod
+    def get_region_from_code(cls, code):
+        for region in Region.__subclasses__():
+            if region.code == code:
+                return region
+    # palliating the codes
+    @classmethod
+    def valid_codes(cls, code):
+        for region in Region.__subclasses__():
+            if region.code == code:
+                yield region
 
 
 @dataclass
-class Regions:
-    region_list: list
+class File:
+    def __init__(self):
+        pass
 
-    def add(self):
-        self.region_list.append(Region)
+    filename: str = ""
+    region: Region = None
+    # getting the region from the file name 
+    @classmethod
+    def get_region_from_filename(cls, filename):
+        for region in Region.__subclasses__():
+            if region.code == filename.code:
+                return region
+    # validating the filename 
+    @classmethod
+    def valid_filename(cls, filename):
+        for region in Region.__subclasses__():
+            if region.code == filename.code:
+                return region
+            else:
+                if filename.code == region.code:
+                    return region
+
+# setting the attributes for the sales class 
+@dataclass
+class DailySales:
+    amount: int = 0
+    date: str = ""
+    region: Region = None
+    quarter: int = 0
+
+    def __post_init__(self):
+        self.quarter = self.calculate_quarter()
+    # calculations and formatting for the quarter 
+    def calculate_quarter(self):
+        # Convert the date string to a datetime object
+        try:
+            date_obj = datetime.strptime(self.date, "%Y-%m-%d")
+        except ValueError:
+            print("Invalid date format. Expected format: YYYY-MM-DD")
+            return 0
+        # Determine the quarter based on the month of the date
+        quarter = (date_obj.month - 1) // 3 + 1
+        return quarter
+    # saving data to the csv 
+    @classmethod
+    def save_to_csv(cls, csv_file):
+        with open(csv_file, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(['Date', 'Amount', 'Region', 'Quarter'])
+
+    # exeption block that handles if the data is valid or not 
+    @classmethod
+    def valid_data(cls, csv_file):
+        try:
+            with open(csv_file, 'r', newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    try:
+                        date = row['Date']
+                        amount = int(row['Amount'])
+                        region = row['Region']
+                        quarter = int(row['Quarter'])
+                        yield DailySales(amount=amount, date=date, region=Region(name=region), quarter=quarter)
+                    except ValueError as e:
+                        print(f"Error processing data: {e}. Skipping this entry.")
+        except FileNotFoundError:
+            print("File not found. Please enter a valid file name.")
+    # exeption block that handles if the data is valid or not 
+    @classmethod
+    def valid_data(cls, csv_file):
+        with open(csv_file, 'r', newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                try:
+                    date = row['Date']
+                    amount = int(row['Amount'])
+                    region = row['Region']
+                    quarter = int(row['Quarter'])
+                    yield date, amount, region, quarter
+                except ValueError as e:
+                    print(f"Error processing data: {e}. Skipping this entry.")
 
 
-def view_sales():
-    print(f"{'Date':<10}{'region':<10}{'amount':<10}")
-    print("-"*35)
-    sale_list = SalesList()
-    query = "SELECT * FROM Sales ORDER BY date(saledate)"
-    for sale in cur.execute(query):
-        sale_list.add(DailySales(sale[0], sale[1], sale[2]))
-    for i, n in enumerate(sale_list):
-        print(f"{i}{n.saleDate:<10}{n.region:<10}{n.amount:<10}")
+class SalesList:
+    sales_data = []
+    # adding the daily sales to be stored in a list 
+    @classmethod
+    def add_daily_sales_to_list(cls, sales):
+        cls.sales_data.append(sales)
+    # formatting for the daily sales 
+    @classmethod
+    def view_daily_sales(cls):
+        total_amount = 0
+        print("{:<2} {:<12} {:<8} {:<15} {:<15}".format("", "Date", "Quarter", "Region", "Amount"))
+        print("-" * 55)
+        for i, sale in enumerate(cls.sales_data, start=1):
+            amount = int(sale.amount)  # Convert sale.amount to an integer
+            total_amount += amount
+            formatted_amount = "${:,.2f}".format(amount)
+            print("{:<1}. {:<12} {:<8} {:<15} {:<15}".format(i, sale.date, sale.quarter, sale.region.name,
+                                                             formatted_amount))
+        print("-" * 55)
+        formatted_total = "${:,.2f}".format(total_amount)
+        print("{:<3} {:<12} {:<8} {:<15} {:<15}".format("Total", "", "", "", formatted_total))
+    # a classmethod that handles addign contents ti the daily sales 
+    @classmethod
+    def add_contents_to_daily_sales(cls, csv_file):
+        for data in DailySales.valid_data(csv_file):
+            sale = DailySales(amount=data[1], date=data[0], region=Region(name=data[2]), quarter=data[3])
+            cls.add_daily_sales_to_list(sale)
 
+# creating the initial window 
+class Menu:
+    @staticmethod
+    def menu_contents():
+        print("COMMAND MENU")
+        print("view - View all sales")
+        print("add - Add sales")
+        print("import - Import sales from CSV file")
+        print("menu - Show menu")
+        print("exit - Exit the program")
+        print()
 
-def import_sales():
-    filename = input("file name: ")
-    with open(filename) as file:
-        reader = csv.reader(file, delimiter=',')
-        for row in reader:
-            query = f"INSERT INTO Sales VALUES (NULL, {row[1]}, {row[2]}, {row[3]})"
-        conn.commit()
-
-
-def add_sale():
-    amount = float(input("Amount: "))
-    date = datetime.date(input('Date: '))
-    region = input('Region: ')
-    query = f"INSERT INTO sales VALUES (NULL, {date}, {region}, {amount})"
-    cur.execute(query)
-    conn.commit()
-
-
+# creating the main program
 def main():
-    print("Stored Sales Importer")
-    print("COMMAND MENU"
-          "view    - View Sales List\n"
-          "add     - Add Sales\n"
-          "import  - Import Sales List\n"
-          "exit    - Exit Program")
-
+    print("SALES DATA IMPORTER")
+    print()
+    Menu.menu_contents()
+    sales_list = SalesList()  # Create an instance of SalesList
     while True:
-        command = input("Command: ")
-
-        if command == 'view':
-            view_sales()
-        elif command == 'add':
-            add_sale()
-        elif command == 'import':
-            import_sales()
-        elif command == 'exit':
+        user_input = input("Please enter command: ")
+        if user_input == "view":
+            sales_list.view_daily_sales()  # Call instance method on the sales_list instance
+        elif user_input == "add":
+            date = input("Enter date (YYYY-MM-DD): ")
+            amount = input("Enter amount: ")
+            try:
+                amount = int(amount)
+            except ValueError:
+                print("Invalid amount. Please enter a valid integer amount.")
+                continue
+            region = input("Enter region: ")
+            sale = DailySales(amount=amount, date=date, region=Region(name=region))
+            sales_list.add_daily_sales_to_list(sale)  # Add the sale to the sales list
+            print("Sale added successfully.")
+        elif user_input == "import":
+            file_name = input("Enter CSV file name: ")
+            sales_list.add_contents_to_daily_sales(file_name)  # Call instance method on the sales_list instance
+            print("Added sales successfully.")
+        elif user_input == "menu":
+            Menu.menu_contents()
+        elif user_input == "exit":
+            print("Bye!")
             break
         else:
-            print("Invalid")
+            print("Invalid command")
 
 
 if __name__ == "__main__":
